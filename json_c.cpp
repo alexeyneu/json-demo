@@ -1,14 +1,10 @@
-// json_c.cpp : Defines the entry point for the console application.
-//
-
-
-#include <iomanip>
 #include <cstdint>
 #include <iostream>
 #include <WinSock2.h>
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS      // some CString constructors will be explicit
 #include <atlenc.h>
 #include <sstream>
+#include <fstream>
 
 #pragma comment(lib, "ws2_32")
 
@@ -31,18 +27,13 @@ int wmain(int argc, wchar_t* argv[])
 	
 	wchar_t w[140];
 	ExpandEnvironmentStrings(L"%APPDATA%\\Bitcore\\.cookie",w,140);
-	FILE *xf;
-	_wfopen_s(&xf,w,L"r+");		
-	char h[518];
-	fwscanf(xf,L"%S",h);      //%S here is microsoft stuff.Wide char function with char arg.  
-	
-	fclose(xf);
-	int x_len = strlen(h); // One byte is represented as two hex characters, thus we divide by two to get real length.
+	std::ifstream fa(w);  
+	std::string h;
+	fa>>h;
 
-	char fifty[200];
-	int len=Base64EncodeGetRequiredLength(x_len);
-	Base64Encode((BYTE *)h,x_len,fifty,&len,ATL_BASE64_FLAG_NOCRLF);
-	fifty[len]='\0';
+	char fifty[200]={};
+	int len=Base64EncodeGetRequiredLength(h.length());
+	Base64Encode((BYTE *)h.c_str(),h.length(),fifty,&len,ATL_BASE64_FLAG_NOCRLF);
 	char t[]="{ \"method\":\"listrece\
 ivedbyaccount\",\"params\": [0],\"id\":\"listreceivedbyaccount\" }\r\n";
 
@@ -52,7 +43,7 @@ ivedbyaccount\",\"params\": [0],\"id\":\"listreceivedbyaccount\" }\r\n";
  
 	
 	char b[1000];
-	send(q,f.str().c_str(),strlen(f.str().c_str()),0);
+	send(q,f.str().c_str(),f.str().length(),0);
 	
 	len=recv(q,b,1000,0);
 
