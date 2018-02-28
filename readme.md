@@ -1,7 +1,7 @@
 ![Screen1](/screens/Untitled%201.jpg)
 ## about 
  json demo  
-   
+   sends request of action to a wallet and then receives smth .  
  - windows version configured to use with btx now  
  for btc change bitcore to bitcoin and 8556 to 8332  
 ## how to:
