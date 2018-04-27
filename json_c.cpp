@@ -8,7 +8,7 @@
 
 int wmain(int argc, wchar_t* argv[])
 {
-	WSADATA fc;56
+	WSADATA fc;
 	WSAStartup(0x202,&fc); //sockets 2.02 ,hibyte and lobyte = 2 
 	hostent *host = gethostbyname("localhost");
 	sockaddr_in server = { AF_INET , htons(8556) /* btx port */ , *((unsigned long*)host->h_addr) };
