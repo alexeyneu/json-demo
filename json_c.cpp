@@ -1,4 +1,3 @@
-#include <cstdint>
 #include <iostream>
 #include <WinSock2.h>
 #include <atlenc.h>
@@ -11,7 +10,7 @@ int wmain(int argc, wchar_t* argv[])
 	WSADATA fc;
 	WSAStartup(0x202,&fc); //sockets 2.02 ,hibyte and lobyte = 2 
 	hostent *host = gethostbyname("localhost");
-	sockaddr_in server = { AF_INET , htons(8556) /* btx port */ , *((unsigned long*)host->h_addr) };
+	sockaddr_in server = { AF_INET , htons(8556) /* btx port */ , *(in_addr*)(unsigned long*)host->h_addr };
 	SOCKET q = socket(AF_INET, SOCK_STREAM , 0);
 	connect(q,(sockaddr*)&server,sizeof(server));
 	wchar_t w[140];
