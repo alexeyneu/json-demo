@@ -9,14 +9,14 @@
  2) this app   
  
 ## windows build:
-req : ms visual studio 2010 (C++)  
-nmake holds well on non-2010 too  
+ms visual C 2005+ (could be compiled on msvc 6.0 i guess )   
   
 vs win64 command prompt (standard command prompt works too if env tuned right ) 
 ```
 nmake
 ```
-  
+
+golang  - casual go build  
 ## linux build:
 openssl installed
 
