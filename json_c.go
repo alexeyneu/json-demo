@@ -1,5 +1,4 @@
 package main
-
 import (
 	"fmt"
 	"os"
@@ -10,9 +9,12 @@ import (
 //Bitcore
 func main() {
 	s:=os.ExpandEnv("${APPDATA}\\Bitcore\\.cookie")
-	data, _ := ioutil.ReadFile(s)
-	var t string
-	fmt.Sscanf(string(data),"__cookie__:%s",&t)
+	data, err := ioutil.ReadFile(s)
+	if err!=nil {
+		fmt.Fprintf(os.Stderr, " %v\n", err)
+		os.Exit(1)
+	}
+	t:=string(data[11:])     // len("__cookie__:")
 	client := &http.Client{}
 	endPoint := "http://localhost:8556"
 	z:=`{ "method":"listreceivedbyaccount","params": [0],"id":"listreceivedbyaccount" }`
