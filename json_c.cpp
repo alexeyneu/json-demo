@@ -20,7 +20,7 @@ int wmain(int argc, wchar_t* argv[])
 	char fifty[200]={}, b[1000]={};
 	int len=Base64EncodeGetRequiredLength(h.length());
 	Base64Encode((BYTE *)h.c_str(), h.length(), fifty, &len, ATL_BASE64_FLAG_NOCRLF); // password is ready for http 
-	char t[]="{ \"method\":\"listreceivedbyaccount\",\"params\": [0],\"id\":\"listreceivedbyaccount\" }"; //json part of request 
+	char t[]=R"({ "method":"listreceivedbyaccount","params": [0],"id":"listreceivedbyaccount" })";
 	std::stringstream f;
 	f<<"POST / HTTP/1.1\r\nContent-Length: "<< sizeof(t)-1 <<"\r\nAuthorization: Basic " << fifty <<"\r\n\r\n"<<t; //full request to json server 
 	send(q,f.str().c_str(), f.str().length() ,0); //gone
