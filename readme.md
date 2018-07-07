@@ -9,9 +9,7 @@
  2) this app   
  
 ## windows build:
-ms visual C 2005+ (could be compiled on msvc 6.0 i guess )   
-  
-vs win64 command prompt (standard command prompt works too if env tuned right ) 
+req vs2013 . VS2013 x64 Native Tools Command Prompt
 ```
 nmake
 ```
