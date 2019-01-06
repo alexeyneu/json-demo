@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+
+
+message terra {
+  oneof mona
+  {
+  	int32 t = 1;
+  	int32 qwint = 2;
+  }
+}
