@@ -8,6 +8,6 @@ json_c: t1.pb/t1.pb.go json_c.go
 	$(LINKER) $(GUIFLAGS)  json_c.go
 
 t1.pb/t1.pb.go: t1.pb/t1.proto
-	cd t1.pb
-	$(CC) $(CFLAGSMT) t1.proto
+	cd t1.pb ;\
+	$(CC) $(CFLAGSMT) ./t1.proto
 	cd ..
