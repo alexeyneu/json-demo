@@ -2,17 +2,20 @@ package main
 import (
 	t1 "./t1.pb"
 	"fmt"
-//	"os"
+	"github.com/golang/protobuf/jsonpb"
+	"bytes"
 //	"io/ioutil"
-//	"net/http"
-//	"bytes"
 )
 
 func main() {
-	t := new(t1.Terra)
+	t := t1.Terra{}
 	t.Mona = &t1.Terra_T{int32(1)}
-//	t.Mona.(*t1.).T=1
-	bt:=t.GetQwint()
-	bt=t.GetT()
+	t.B = 2
+//	bt:=t.GetQwint()
+//	bt=t.GetT()
+	bt:=bytes.NewBuffer(nil)
+	b := &jsonpb.Marshaler{}
+	b.Marshal(bt , &t)
 	fmt.Println(bt)
+	fmt.Println(t.String())
 }
