@@ -21,10 +21,14 @@ func main() {
 	tr := f.Field(c); 
 	x := f.Type().Field(c);c = c + 1
 		;fmt.Println(x,tr)
-	tr = f.Field(c); c = c + 1;
+	tr = f.Field(c);
+	x = f.Type().Field(c);c = c + 1
+	if x.Tag.Get("protobuf_oneof") != "" {
+		fmt.Println("tr")
+	}
 	z := tr.Elem().Elem().Field(0)
-	x = tr.Elem().Elem().Type().Field(0)
-	fmt.Println(x,z);
+	xb := tr.Elem().Elem().Type().Field(0)
+	fmt.Println(xb,z);
 	fmt.Println("\n",ce)
 
 
