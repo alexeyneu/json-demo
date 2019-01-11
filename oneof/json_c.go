@@ -2,6 +2,7 @@ package main
 import (
 	t1 "./t1.pb"
 	"fmt"
+	"reflect"
 	"github.com/golang/protobuf/jsonpb"
 )
 
@@ -11,5 +12,20 @@ func main() {
 	t.B = 2
 	b := &jsonpb.Marshaler{}
 	bt,_ := b.MarshalToString(&t)
-	fmt.Println(bt)
+	fmt.Println(bt,"\n")
+
+	
+	f := reflect.ValueOf(t)
+	ce := f.Type()
+	c := 0
+	tr := f.Field(c); 
+	x := f.Type().Field(c);c = c + 1
+		;fmt.Println(x,tr)
+	tr = f.Field(c); c = c + 1;
+	z := tr.Elem().Elem().Field(0)
+	x = tr.Elem().Elem().Type().Field(0)
+	fmt.Println(x,z);
+	fmt.Println("\n",ce)
+
+
 }
