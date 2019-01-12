@@ -14,8 +14,8 @@ func main() {
 	bt,_ := b.MarshalToString(&t)
 	fmt.Println(bt,"\n")
 
-	
-	f := reflect.ValueOf(t)
+	var f reflect.Value
+	f = reflect.ValueOf(t)
 	ce := f.Type()
 	c := 0
 	tr := f.Field(c); 
@@ -23,13 +23,23 @@ func main() {
 		;fmt.Println(x,tr)
 	tr = f.Field(c);
 	x = f.Type().Field(c);c = c + 1
+
+	
+
 	if x.Tag.Get("protobuf_oneof") != "" {
 		fmt.Println("tr")
 	}
 	z := tr.Elem().Elem().Field(0)
 	xb := tr.Elem().Elem().Type().Field(0)
+	sq := reflect.TypeOf(z.Interface())
+	wr := f.Kind()
+	trtd := reflect.TypeOf(f.Interface())
+
 	fmt.Println(xb,z);
 	fmt.Println("\n",ce)
+	fmt.Println(sq)
+	fmt.Println(wr)
+	fmt.Println(trtd)
 
 
 }
