@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 t1 "./t1.pb"
-"gopkg.in/alexeyneu/precise-proofs.v2/proofs"
+"gopkg.in/alexeyneu/precise-proofs.v1/proofs"
 )
 
 func main() {
