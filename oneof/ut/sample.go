@@ -40,6 +40,10 @@ func main() {
 	checkErr(err)
 
 	fmt.Printf("Proof validated: %v\n", valid)
+
+	proof, err = doctree.CreateProof("qwint")
+	checkErr(err)
+
 }
 
 func checkErr(err error) {
