@@ -4,7 +4,7 @@
 #include <ctime>
 #include <algorithm>
 
-int UniqueNumber () { return  std::rand() % 10;}
+int UniqueNumber () { return  std::rand() % 9 + 1;}
 int main()
 {
 	int m = 25;
