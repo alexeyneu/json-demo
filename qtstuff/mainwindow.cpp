@@ -304,7 +304,9 @@ void brough(std::filesystem::path tf)
     {
         std::string torque;
         int rd = 0;
-        std::for_each(std::execution::par, c.begin(), c.end(), [&](auto a){ int wr = std::count(t.begin(), t.end(), a) == 0 ? std::count( c.begin(), c.end(), a) : 0;  *sp_tray = 25.0*counter++/(15*c.size()); torque = wr > rd ? a : torque; rd = std::max(rd , wr); });
+        std::mutex mtb;
+        std::for_each(std::execution::par, c.begin(), c.end(), [&](auto a){ int wr = std::count(t.begin(), t.end(), a) == 0 ? std::count( c.begin(), c.end(), a) : 0;
+        *sp_tray = 25.0*counter++/(15*c.size()); std::unique_lock<std::mutex> lb(mtb);  torque = wr > rd ? a : torque; rd = std::max(rd , wr); });
         t.insert(t.end(), torque);
         std::unique_lock<std::mutex> lt(com_mx);
         tfinal.insert(tfinal.end(), { torque , rd } );
