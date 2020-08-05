@@ -12,8 +12,6 @@
 #include <fstream>
 
 
-std::vector<std::pair<std::string,int>> tfinal;
-
 int main(int argc, char *argv[])
 {
 

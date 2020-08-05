@@ -16,17 +16,15 @@
 #include <mutex>
 #include <string>
 #include <filesystem>
+#include <QColorDialog>
+#include <atomic>
 
-//#include    <QtDataVisualization>
 
-//using namespace QtDataVisualization;
+std::vector<std::pair<std::string,int>> tfinal;
 
-#include    <QColorDialog>
-extern std::vector<std::pair<std::string,int>> tfinal;
-
-std::weak_ptr<int> com_r;
+std::weak_ptr<std::atomic_int> com_r;
 std::condition_variable com_cvp;
-bool com_tr, com_onemore;
+std::atomic<bool> com_tr, com_onemore;
 std::mutex com_mx;
 std::thread h, dest;
 
@@ -123,7 +121,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onemore()
 {
-    instore = com_r.lock() ? *com_r.lock() : instore;
+    instore = int(com_r.lock() ? *com_r.lock() : instore);
     instore = com_tr ? 25 /* max */ : instore;
     ui->progBarH->setValue(instore);
     std::unique_lock<std::mutex> lt(com_mx);
@@ -287,7 +285,7 @@ void brough(std::filesystem::path tf)
         dest.join();
         return;
     }
-    std::shared_ptr<int> sp_tray = std::shared_ptr<int>(new int(0));
+    std::shared_ptr<std::atomic_int> sp_tray = std::shared_ptr<std::atomic_int>(new std::atomic_int(0));
     std::vector<std::string> c;
 
     com_r = sp_tray;
@@ -329,10 +327,10 @@ void brough(std::filesystem::path tf)
 
 void dispatch(MainWindow *t)
 {   
-    std::mutex com_mp;
+    std::mutex m_r;
     do {
         com_onemore = false;
-        std::unique_lock<std::mutex> lk(com_mp);
+        std::unique_lock<std::mutex> lk(m_r);
         com_cvp.wait_for(lk ,std::chrono::milliseconds(900) ,[] { return com_tr == !false||com_onemore == !false; }); 
         QMetaObject::invokeMethod(t, "onemore", Qt::QueuedConnection);
     }while(!com_tr);
