@@ -121,7 +121,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onemore()
 {
-    instore = int(com_r.lock() ? *com_r.lock() : instore);
+    instore = com_r.lock() ? (int)*com_r.lock() : instore;
     instore = com_tr ? 25 /* max */ : instore;
     ui->progBarH->setValue(instore);
     std::unique_lock<std::mutex> lt(com_mx);
