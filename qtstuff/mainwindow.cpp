@@ -122,7 +122,6 @@ MainWindow::~MainWindow()
 void MainWindow::onemore()
 {
     instore = com_r.lock() ? (int)*com_r.lock() : instore;
-    instore = com_tr ? 25 /* max */ : instore;
     ui->progBarH->setValue(instore);
     std::unique_lock<std::mutex> lt(com_mx);
     if(dealtwith != tfinal.size())
@@ -296,7 +295,7 @@ void brough(std::filesystem::path tf)
     auto t1 = std::chrono::system_clock::now();
     std::vector<std::string> t;
 
-    int counter = 0;
+    std::atomic_int counter = 0;
     
     for(int ft = 0 ; ft < 15; ft++)
     {
@@ -304,7 +303,7 @@ void brough(std::filesystem::path tf)
         int rd = 0;
         std::mutex mtb;
         std::for_each(std::execution::par, c.begin(), c.end(), [&](auto a){ int wr = std::count(t.begin(), t.end(), a) == 0 ? std::count( c.begin(), c.end(), a) : 0;
-        *sp_tray = 25.0*counter++/(15*c.size()); std::unique_lock<std::mutex> lb(mtb);  torque = wr > rd ? a : torque; rd = std::max(rd , wr); });
+        *sp_tray = 25*++counter/(15*c.size()); std::unique_lock<std::mutex> lb(mtb);  torque = wr > rd ? a : torque; rd = std::max(rd , wr); });
         t.insert(t.end(), torque);
         std::unique_lock<std::mutex> lt(com_mx);
         tfinal.insert(tfinal.end(), { torque , rd } );
@@ -314,7 +313,6 @@ void brough(std::filesystem::path tf)
     std::cout << std::endl; 
     for(auto k : t)
         std::cout  << k << std::endl;
-
     auto t2 = std::chrono::system_clock::now();
     std::chrono::milliseconds f =  std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
     std::cout  << f.count() << std::endl;
