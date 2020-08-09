@@ -64,7 +64,8 @@ void brough(void *w)
 	auto t1 = std::chrono::system_clock::now();
 	std::vector<std::string> t;
 
-    int counter = 0;
+	int counter = 0; //with the stuff below final result will be 25.0 vs 24.947 now
+	//std::atomic_int int counter = 0;
 
 	for(int ft = 0 ; ft < 15; ft++)
 	{
