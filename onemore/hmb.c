@@ -10,8 +10,6 @@
 #include <poll.h>
 #include <libgen.h>
 
-
-
 int main(int argc , char *argv[])
 {
     struct sockaddr_in addr = { AF_INET , htons( 8888 ) /* btc port */ , htonl(INADDR_LOOPBACK) };;
@@ -19,7 +17,7 @@ int main(int argc , char *argv[])
     int result = 0;
     int ret = 0;
     bool c = !false;
-    int bc = 1024;    
+    int bc = 1024;
     enum { buf_size = 1025 };
     char buf[buf_size] = {0};
     char buf2[buf_size] = {0};
@@ -44,44 +42,42 @@ int main(int argc , char *argv[])
     int nready;
     pfd[0].fd = data_socket;
     pfd[0].events = POLLOUT;
-    if (argc == 2 && strncmp(argv[1] ,"SHUTDOWN?" ,20) == 0)
-    {
-  		strcpy(buf, "DOWN\xF7");
-  		nready = poll(pfd, 1, 15 * 1000);
-   		ret = write(data_socket, buf, sizeof(buf) - 1);
-   		printf("write %s to socket, ret = %d\n", buf, ret);
-   		close(data_socket);
-    	exit(EXIT_SUCCESS);
+    if (argc == 2 && strncmp(argv[1] , "SHUTDOWN?" , 20) == 0) {
+        strcpy(buf, "DOWN\xF7");
+        nready = poll(pfd, 1, 15 * 1000);
+        ret = write(data_socket, buf, sizeof(buf) - 1);
+        printf("write %s to socket, ret = %d\n", buf, ret);
+        close(data_socket);
+        exit(EXIT_SUCCESS);
     }
- 
+
     FILE *w;
-    if ( argc != 2 || (w = fopen(argv[1] ,"r+")) == NULL) 
-    {
-      perror("no bowler");
-      exit(EXIT_FAILURE);
-  	}
-  	strcpy(buf, basename(argv[1]));
-  	nready = poll(pfd, 1, 15 * 1000);
-  	ret = write(data_socket, buf , sizeof(buf) - 1);
-  	memset(buf, 0, sizeof(buf));
-  	strcpy(buf, "NAME\xF7");
-  	nready = poll(pfd, 1, 15 * 1000);
+    if ( argc != 2 || (w = fopen(argv[1] , "r+")) == NULL) {
+        perror("no bowler");
+        exit(EXIT_FAILURE);
+    }
+    strcpy(buf, basename(argv[1]));
+    nready = poll(pfd, 1, 15 * 1000);
+    ret = write(data_socket, buf , sizeof(buf) - 1);
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf, "NAME\xF7");
+    nready = poll(pfd, 1, 15 * 1000);
     ret = write(data_socket, buf, sizeof(buf) - 1);
 
     while (!false)
-    {	
+    {
 
-    	memset(buf, 0, sizeof(buf));
-    	fread(buf ,1 ,sizeof(buf) - 1 ,w);
-    	if(feof(w)) {
-    		strcpy(buf2 ,"EOF\xF7");
-     		nready = poll(pfd, 1, 15 * 1000);
-    		ret = write(data_socket, buf2 , sizeof(buf2) - 1);   		
+        memset(buf, 0, sizeof(buf));
+        fread(buf , 1 , sizeof(buf) - 1 , w);
+        if (feof(w)) {
+            strcpy(buf2 , "EOF\xF7");
+            nready = poll(pfd, 1, 15 * 1000);
+            ret = write(data_socket, buf2 , sizeof(buf2) - 1);
 
-    		nready = poll(pfd, 1, 15 * 1000);
-    		ret = write(data_socket, buf , sizeof(buf) - 1);
-  			break;
-    	}
+            nready = poll(pfd, 1, 15 * 1000);
+            ret = write(data_socket, buf , sizeof(buf) - 1);
+            break;
+        }
 
         nready = poll(pfd, 1, 15 * 1000);
         // if((pfd[0].revents & (POLLOUT|POLLHUP))) printf("tray \n" );

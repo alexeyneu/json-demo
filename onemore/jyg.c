@@ -9,10 +9,28 @@
 #include <string.h>
 #include <poll.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <sys/signalfd.h>
 
+int sfd;
+int cfd;
+
+void loosecanon(int signum) {
+    close(cfd);
+    close(sfd);
+    printf(" termination here\n");
+    exit(EXIT_SUCCESS);
+}
 
 int main(int argc , char *argv[])
 {
+    struct sigaction action;
+    memset(&action, 0, sizeof(action));
+    action.sa_handler = loosecanon;
+    sigaction(SIGTERM, &action, NULL);
+    sigaction(SIGHUP, &action, NULL);
+    sigaction(SIGINT, &action, NULL);
+
     struct sockaddr_in addr = { AF_INET , htons( 8888 ) /* btc port */ , htonl(INADDR_LOOPBACK) };;
     int down_flag = 0;
     int result = 0;
@@ -20,7 +38,7 @@ int main(int argc , char *argv[])
     bool c = !false;
     int bc = 1024;    
 
-    int sfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    sfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sfd < 0) {
         perror("Create server socket error: %s\n");
         return 0;
@@ -48,25 +66,42 @@ int main(int argc , char *argv[])
     enum { buf_size = 1025 };
     char buf[buf_size] = {0};
     char name[buf_size] = {0};
-
-    struct pollfd pfd[1] = {{0}};
+    sigset_t sig;
+    sigset_t *xsig = &sig;
+    struct pollfd pfd[2] = {{0}};
     int nready;
-
+    sigemptyset(xsig);
+    sigaddset(xsig, SIGINT);
+    sigaddset(xsig, SIGTERM);
+    sigaddset(xsig, SIGHUP);
+    pfd[1].fd = signalfd(-1 ,xsig ,SFD_NONBLOCK);
+    pfd[1].events = POLLIN;
+ //   sigprocmask(SIG_BLOCK, xsig, NULL);
+   
     for (;;)
     {
         bool name_again = false;
         bool eof_flag = false;
 
         printf("Waiting to accept a connection...\n");
-        int cfd = accept(sfd, NULL, NULL);
+        cfd = accept(sfd, NULL, NULL);
         printf("Accepted socket fd = %d\n", cfd);
+        if(cfd == -1)
+        {
+            perror("looks like SIGTERM");
+            goto _exit;
+        } 
         result = 0;
         pfd[0].fd = cfd;
 //      pfd[0].fd = sfd;
         pfd[0].events = POLLIN;
 
         memset(buf, 0, sizeof(buf));
-        nready = poll(pfd, 1, 15 * 1000);
+        nready = poll(pfd, 2, 15 * 1000);
+        if (pfd[1].revents & POLLIN) {
+            printf("termination signal\n");            
+            goto _exit;
+        }
         num_rd = read(cfd, buf, sizeof(buf) - 1);
         if (!strncmp(buf, "DOWN\xF7", 20)) {
             close(cfd);
@@ -76,7 +111,11 @@ int main(int argc , char *argv[])
         memset(name, 0, sizeof(name));
         strcpy(name, buf);
         memset(buf, 0, sizeof(buf));        
-        nready = poll(pfd, 1, 15 * 1000);
+        nready = poll(pfd, 2, 15 * 1000);
+        if (pfd[1].revents & POLLIN) {
+            printf("termination signal\n");            
+            goto _exit;
+        }        
         num_rd = read(cfd, buf, sizeof(buf) - 1);
         printf("Read data: %s\n", buf);
         if (!strncmp(buf, "DOWN\xF7", 20)) {
@@ -99,7 +138,11 @@ int main(int argc , char *argv[])
         }
         while (!false) {
             memset(buf, 0, sizeof(buf));
-            nready = poll(pfd, 1, 15 * 1000);
+            nready = poll(pfd, 2, 15 * 1000);
+            if (pfd[1].revents & POLLIN) {
+                printf("termination signal\n");            
+                goto _exit;
+            }            
             num_rd = read(cfd, buf, sizeof(buf) - 1);
             if (num_rd <= 0) break;
             /* Handle commands */
@@ -123,14 +166,18 @@ int main(int argc , char *argv[])
                 continue;
             }
             if (eof_flag) {
-                write(wx, buf, strlen(buf));
+                sigprocmask(SIG_BLOCK, xsig, NULL);
+                ret = write(wx, buf, strlen(buf));
+                sigprocmask(SIG_UNBLOCK, xsig, NULL);
                 if (-1 == ret) {
                     perror("Write error , file i/o\n"); //то что файл открыт я не вижу проблем
                     goto _exit;
                 }
                 continue;
             }
+            sigprocmask(SIG_BLOCK, xsig, NULL);
             ret = write(wx, buf, sizeof(buf) - 1);
+            sigprocmask(SIG_UNBLOCK, xsig, NULL);
             if (-1 == ret) {
                 perror("Write error , file i/o\n");
                 goto _exit;
@@ -142,7 +189,11 @@ int main(int argc , char *argv[])
         memset(buf, 0, sizeof(buf));
         sprintf(buf, "all right");
         pfd[0].events = POLLOUT;
-        nready = poll(pfd, 1, 15 * 1000);
+        nready = poll(pfd, 2, 15 * 1000);
+        if (pfd[1].revents & POLLIN) {
+            printf("termination signal\n");            
+            goto _exit;
+        }
         ret = write(cfd, buf, sizeof(buf) - 1);
         if (-1 == ret) {
             perror("Write error\n");
